@@ -1,0 +1,54 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'by.gstu.fitness'
+version = '1.0-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.apache.commons:commons-lang3:3.13.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.0'
+}
+
+application {
+    mainClass = 'by.gstu.fitness.App'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+// Задача для создания fat JAR
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Main-Class': 'by.gstu.fitness.App'
+    }
+    from sourceSets.main.output
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
+    }
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
+// Пользовательская задача
+task helloGradle {
+    doLast {
+        println 'Hello, Gradle! Это моя первая задача.'
+    }
+}
+
+// Задача для копирования JAR
+task copyJar(type: Copy) {
+    from 'build/libs'
+    into 'dist'
+    include '*.jar'
+}
+copyJar.dependsOn fatJar
